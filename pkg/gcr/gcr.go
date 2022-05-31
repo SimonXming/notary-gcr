@@ -10,22 +10,23 @@ import (
 )
 
 type TrustedGcrRepository struct {
-	ref    name.Reference
-	auth   authn.Authenticator
-	config *trust.Config
+	ref        name.Reference
+	repoAuth   authn.Authenticator
+	notaryAuth authn.Authenticator
+	config     *trust.Config
 }
 
-func NewTrustedGcrRepository(configDir string, ref name.Reference, auth authn.Authenticator) (TrustedGcrRepository, error) {
+func NewTrustedGcrRepository(configDir string, ref name.Reference, repoAuth authn.Authenticator, notaryAuth authn.Authenticator) (TrustedGcrRepository, error) {
 	config, err := trust.ParseConfig(configDir)
 	if err != nil {
 		log.Errorf("failed to parse config: %s", err)
 		return TrustedGcrRepository{}, err
 	}
-	return TrustedGcrRepository{ref, auth, config}, nil
+	return TrustedGcrRepository{ref, repoAuth, notaryAuth, config}, nil
 }
 
 func (repo *TrustedGcrRepository) ListTarget() ([]*client.Target, error) {
-	targets, err := listTargets(repo.ref, repo.auth, repo.config)
+	targets, err := listTargets(repo.ref, repo.notaryAuth, repo.config)
 	if err != nil {
 		log.Errorf("failed to list targets: %s", err)
 		return nil, err
@@ -34,16 +35,16 @@ func (repo *TrustedGcrRepository) ListTarget() ([]*client.Target, error) {
 }
 
 func (repo *TrustedGcrRepository) TrustPush(img v1.Image) error {
-	err := pushImage(repo.ref, img, repo.auth)
+	err := pushImage(repo.ref, img, repo.repoAuth)
 	if err != nil {
 		log.Errorf("failed to push image: %s", err)
 		return err
 	}
-	return pushTrustedReference(repo.ref, img, repo.auth, repo.config)
+	return pushTrustedReference(repo.ref, img, repo.notaryAuth, repo.config)
 }
 
 func (repo *TrustedGcrRepository) Verify() (*client.Target, error) {
-	target, err := getTrustedTarget(repo.ref, repo.auth, repo.config)
+	target, err := getTrustedTarget(repo.ref, repo.notaryAuth, repo.config)
 	if err != nil {
 		log.Errorf("failed to verify repository: %s", err)
 		return nil, err
@@ -52,7 +53,7 @@ func (repo *TrustedGcrRepository) Verify() (*client.Target, error) {
 }
 
 func (repo *TrustedGcrRepository) SignImage(img v1.Image) error {
-	err := signImage(repo.ref, img, repo.auth, repo.config)
+	err := signImage(repo.ref, img, repo.notaryAuth, repo.config)
 	if err != nil {
 		log.Errorf("failed to sign image: %s", err)
 		return err
@@ -61,7 +62,7 @@ func (repo *TrustedGcrRepository) SignImage(img v1.Image) error {
 }
 
 func (repo *TrustedGcrRepository) RevokeTag(tag string) error {
-	err := revokeImage(repo.ref, tag, repo.auth, repo.config)
+	err := revokeImage(repo.ref, tag, repo.notaryAuth, repo.config)
 	if err != nil {
 		log.Errorf("failed to revoke trusted repository: %s", err)
 		return err
