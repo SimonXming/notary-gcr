@@ -11,11 +11,11 @@ import "github.com/simonshyu/notary-gcr/pkg/gcr"
 Construct a new Trusted GCR Repository, then use the various action support by the Repository. For example:
 
 ```go
-repoAuth := &authn.Basic{...}
+registryAuth := &authn.Basic{...}
 notaryAuth := &authn.Basic{...}
 ref, _ := name.ParseReference("docker-registry.com/foo/image:latest", name.WeakValidation)
 
-trustedRepo, _ := gcr.NewTrustedGcrRepository("~/.notary", ref, repoAuth, notaryAuth)
+trustedRepo, _ := gcr.NewTrustedGcrRepository("~/.notary", ref, registryAuth, notaryAuth)
 ```
 
 ## Limitation

@@ -61,7 +61,7 @@ func ParseConfig(configDir string) (*Config, error) {
 
 func parseScopes(config *Config) string {
 	if config.Scopes == "" {
-		return transport.PushScope
+		return transport.PullScope
 	}
 	supportScopes := []string{
 		transport.PullScope,

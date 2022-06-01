@@ -10,19 +10,19 @@ import (
 )
 
 type TrustedGcrRepository struct {
-	ref        name.Reference
-	repoAuth   authn.Authenticator
-	notaryAuth authn.Authenticator
-	config     *trust.Config
+	ref          name.Reference
+	registryAuth authn.Authenticator
+	notaryAuth   authn.Authenticator
+	config       *trust.Config
 }
 
-func NewTrustedGcrRepository(configDir string, ref name.Reference, repoAuth authn.Authenticator, notaryAuth authn.Authenticator) (TrustedGcrRepository, error) {
+func NewTrustedGcrRepository(configDir string, ref name.Reference, registryAuth authn.Authenticator, notaryAuth authn.Authenticator) (TrustedGcrRepository, error) {
 	config, err := trust.ParseConfig(configDir)
 	if err != nil {
 		log.Errorf("failed to parse config: %s", err)
 		return TrustedGcrRepository{}, err
 	}
-	return TrustedGcrRepository{ref, repoAuth, notaryAuth, config}, nil
+	return TrustedGcrRepository{ref, registryAuth, notaryAuth, config}, nil
 }
 
 func (repo *TrustedGcrRepository) ListTarget() ([]*client.Target, error) {
@@ -35,7 +35,7 @@ func (repo *TrustedGcrRepository) ListTarget() ([]*client.Target, error) {
 }
 
 func (repo *TrustedGcrRepository) TrustPush(img v1.Image) error {
-	err := pushImage(repo.ref, img, repo.repoAuth)
+	err := pushImage(repo.ref, img, repo.registryAuth)
 	if err != nil {
 		log.Errorf("failed to push image: %s", err)
 		return err
