@@ -100,7 +100,8 @@ func pushTrustedReference(ref name.Reference, img v1.Image, auth authn.Authentic
 	}
 
 	if err != nil {
-		log.Infof("failed to sign: %s", err)
+		log.Warnf("Failed to sign: %s:%s %s\n", ref.Context().Name(), ref.Identifier(), err)
+		return err
 	}
 	log.Infof("Successfully signed %s:%s\n", ref.Context().Name(), ref.Identifier())
 	return nil
