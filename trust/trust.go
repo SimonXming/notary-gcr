@@ -99,12 +99,12 @@ func GetNotaryRepository(ref name.Reference, auth authn.Authenticator, repoInfo 
 
 	repo := ref.Context()
 	gun := repo.String()
-	scopes := []string{fmt.Sprintf("repository:%s:%s", gun, transport.PushScope)}
+	scopes := []string{fmt.Sprintf("repository:%s:%s", gun, config.Scopes)}
 	notaryURL, _ := url.Parse(server)
 	reg, _ := name.NewRegistry(notaryURL.Host)
 	if notaryURL.Host == NotaryServerHostname {
 		gun = fmt.Sprintf("%s/%s", NotaryServerIndexAlias, repo.RepositoryStr())
-		scopes = []string{fmt.Sprintf("repository:%s:%s", gun, transport.PushScope)}
+		scopes = []string{fmt.Sprintf("repository:%s:%s", gun, config.Scopes)}
 		log.Infof("Overrode registry (%s), GUN (%s), and scopes (%s) for default Notary DCT", reg.Name(), gun, scopes)
 	}
 

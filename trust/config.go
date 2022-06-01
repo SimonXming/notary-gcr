@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,6 +15,7 @@ type Config struct {
 	ServerUrl            string `json:"server_url"`
 	RootPassphrase       string `json:"root_passphrase"`
 	RepositoryPassphrase string `json:"repository_passphrase"`
+	Scopes               string `json:"scopes,omitempty"`
 }
 
 const (
@@ -52,7 +54,33 @@ func ParseConfig(configDir string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	c.Scopes = parseScopes(c)
 	c.RootPath = configDir
 	return c, nil
+}
+
+func parseScopes(config *Config) string {
+	if config.Scopes == "" {
+		return transport.PushScope
+	}
+	supportScopes := []string{
+		transport.PullScope,
+		transport.PushScope,
+		transport.DeleteScope,
+		transport.CatalogScope,
+	}
+	if !contains(supportScopes, config.Scopes) {
+		log.Warnf("Scope %s is not supported. Supported: ['pull', 'push,pull', 'catalog'] ", config.Scopes)
+		return transport.PullScope
+	}
+	return config.Scopes
+}
+
+func contains(sl []string, v string) bool {
+	for _, vv := range sl {
+		if vv == v {
+			return true
+		}
+	}
+	return false
 }
